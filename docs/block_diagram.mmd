@@ -1,0 +1,41 @@
+graph TD
+    A[Frontend<br>Web/App] -->|HTTP: REST| B[API Gateway]
+    
+    B -->|HTTP: Auth| C[Auth Service<br>Google OAuth, 2FA]
+    B -->|HTTP: Accounts| D[Accounts Service<br>$1M Virtual, Reset]
+    B -->|HTTP: Orders| E[Orders Service<br>Validate, Publish]
+    B -->|HTTP: Portfolio| F[Portfolio Service<br>PnL, Positions]
+    B -->|HTTP: Leaderboard| G[Leaderboard Service<br>Rankings]
+    
+    C -->|DB Write: User| H[PostgreSQL<br>Users, Accounts, Ledger]
+    D -->|DB Write: Account| H
+    D -->|DB Write: Ledger| H
+    E -->|DB Read: Validate| H
+    F -->|DB Write: Positions| H
+    G -->|DB Read: Metrics| H
+    
+    E -->|Kafka: streams.orders.commands| I[Kafka<br>Event Streams]
+    I -->|Consume: Orders| J[Matching Engine<br>C++, FIFO Matching]
+    J -->|Kafka: streams.trades| I
+    K[Market Data Service<br>Binance, Simulated] -->|Kafka: streams.marketdata| I
+    I -->|Consume: Trades, MarketData| F
+    I -->|Consume: Trades, MarketData| L[Analytics<br>Feature Store, Strategies]
+    L -->|Kafka: Metrics| I
+    I -->|Consume: Metrics| G
+    L -->|DB Write: Features| H
+
+    classDef service fill:#FF9800,stroke:#F57C00,stroke-width:2px;
+    classDef frontend fill:#4CAF50,stroke:#388E3C,stroke-width:2px;
+    classDef gateway fill:#2196F3,stroke:#1976D2,stroke-width:2px;
+    classDef db fill:#607D8B,stroke:#455A64,stroke-width:2px;
+    classDef kafka fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px;
+    classDef engine fill:#F44336,stroke:#D32F2F,stroke-width:2px;
+    classDef analytics fill:#E91E63,stroke:#C2185B,stroke-width:2px;
+
+    class A frontend;
+    class B gateway;
+    class C,D,E,F,G service;
+    class H db;
+    class I kafka;
+    class J engine;
+    class L analytics;

@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Gateway as API Gateway
+    participant Orders as Orders Service
+    participant Kafka
+    participant Engine as Matching Engine
+    participant Portfolio as Portfolio Service
+    participant DB as PostgreSQL
+
+    User->>Frontend: Login (Google OAuth)
+    Frontend->>Gateway: POST /v1/auth/login
+    Gateway->>Orders: Validate Google JWT
+    Orders->>DB: Store/Lookup User
+    DB-->>Orders: User ID
+    Orders-->>Gateway: JWT Token
+    Gateway-->>Frontend: Auth Success
+
+    User->>Frontend: Place Order (e.g., BTC-USD, BUY, LIMIT)
+    Frontend->>Gateway: POST /v1/orders {account_id, symbol, side, type, qty, price}
+    Gateway->>Orders: Forward Order
+    Orders->>DB: Validate Balance, Symbol
+    DB-->>Orders: Valid
+    Orders->>Kafka: Publish OrderCommand (streams.orders.commands)
+    Kafka-->>Engine: Consume OrderCommand
+    Engine->>Engine: Match Order (FIFO)
+    Engine->>Kafka: Publish TradeExecuted (streams.trades)
+    Kafka-->>Portfolio: Consume TradeExecuted
+    Portfolio->>DB: Update Positions, PnL
+    DB-->>Portfolio: Success
+    Portfolio->>Kafka: Publish PortfolioUpdate
+    Frontend->>Gateway: GET /v1/portfolio/{account_id}
+    Gateway->>Portfolio: Query Portfolio
+    Portfolio->>DB: Read Positions, PnL
+    DB-->>Portfolio: Data
+    Portfolio-->>Gateway: Portfolio Data
+    Gateway-->>Frontend: Display Portfolio
