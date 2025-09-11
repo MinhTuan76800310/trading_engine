@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candlestick Chart</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff9000;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #00cc00;
+        }
+        .status.connecting .status-indicator {
+            background-color: #ffcc00;
+        }
+        .status.disconnected .status-indicator {
+            background-color: #ff3333;
+        }
+        .status-text {
+            font-size: 14px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 600px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #ff9000;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #ffaa33;
+        }
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        .info {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #ff9000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">Real-Time Candlestick Chart</div>
+            <div class="status" id="status">
+                <div class="status-indicator"></div>
+                <div class="status-text">Connected</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn">Start Data Stream</button>
+            <button id="stopBtn" disabled>Stop Data Stream</button>
+            <button id="resetBtn">Reset Chart</button>
+        </div>
+        
+        <div class="chart-container" id="chart"></div>
+        
+        <div class="info">
+            <h3>Information</h3>
+            <p>This chart displays simulated real-time candlestick data. The WebSocket connection is being simulated in the browser since we can't connect to a local server in this environment.</p>
+            <p>Each candle represents 1 minute of trading activity. Green candles indicate price increases, red candles indicate price decreases.</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lightweight-charts@4.0.1/dist/lightweight-charts.standalone.production.js"></script>
+    <script>
+        // Initialize chart
+        const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+            width: document.getElementById('chart').clientWidth,
+            height: 500,
+            layout: {
+                backgroundColor: '#000000',
+                textColor: 'rgba(255, 255, 255, 0.9)',
+            },
+            grid: {
+                vertLines: {
+                    color: 'rgba(197, 203, 206, 0.5)',
+                },
+                horzLines: {
+                    color: 'rgba(197, 203, 206, 0.5)',
+                },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            priceScale: {
+                borderColor: 'rgba(197, 203, 206, 0.8)',
+            },
+            timeScale: {
+                borderColor: 'rgba(197, 203, 206, 0.8)',
+                timeVisible: true,
+                secondsVisible: false,
+            },
+        });
+
+        const candleSeries = chart.addCandlestickSeries({
+            upColor: '#00ff00',
+            downColor: '#ff0000',
+            borderDownColor: 'rgba(255, 144, 0, 1)',
+            borderUpColor: 'rgba(255, 144, 0, 1)',
+            wickDownColor: 'rgba(255, 144, 0, 1)',
+            wickUpColor: 'rgba(255, 144, 0, 1)',
+        });
+
+        // Initial sample data
+        const initialData = [
+            { time: '2023-10-01', open: 100, high: 110, low: 95, close: 105 },
+            { time: '2023-10-02', open: 105, high: 115, low: 100, close: 110 },
+            { time: '2023-10-03', open: 110, high: 120, low: 105, close: 115 },
+            { time: '2023-10-04', open: 115, high: 125, low: 110, close: 120 },
+            { time: '2023-10-05', open: 120, high: 130, low: 115, close: 125 },
+        ];
+        candleSeries.setData(initialData);
+
+        // WebSocket simulation
+        let dataInterval;
+        let lastClose = 125;
+        let lastTime = new Date('2023-10-05').getTime() / 1000;
+        const statusElement = document.getElementById('status');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function generateRandomCandle() {
+            const change = (Math.random() - 0.5) * 10;
+            const open = lastClose;
+            const close = open + change;
+            const high = Math.max(open, close) + Math.random() * 5;
+            const low = Math.min(open, close) - Math.random() * 5;
+            
+            lastClose = close;
+            lastTime += 60; // 1 minute intervals
+            
+            return {
+                time: lastTime,
+                open: parseFloat(open.toFixed(2)),
+                high: parseFloat(high.toFixed(2)),
+                low: parseFloat(low.toFixed(2)),
+                close: parseFloat(close.toFixed(2)),
+            };
+        }
+
+        function connectWebSocket() {
+            updateStatus('connecting');
+            
+            // Simulate connection delay
+            setTimeout(() => {
+                updateStatus('connected');
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                // Start generating data
+                dataInterval = setInterval(() => {
+                    const candle = generateRandomCandle();
+                    candleSeries.update(candle);
+                }, 1000);
+            }, 1000);
+        }
+
+        function disconnectWebSocket() {
+            updateStatus('disconnected');
+            clearInterval(dataInterval);
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        function resetChart() {
+            disconnectWebSocket();
+            candleSeries.setData(initialData);
+            lastClose = 125;
+            lastTime = new Date('2023-10-05').getTime() / 1000;
+        }
+
+        function updateStatus(status) {
+            statusElement.classList.remove('connected', 'connecting', 'disconnected');
+            statusElement.classList.add(status);
+            statusElement.querySelector('.status-text').textContent = 
+                status.charAt(0).toUpperCase() + status.slice(1);
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', connectWebSocket);
+        stopBtn.addEventListener('click', disconnectWebSocket);
+        resetBtn.addEventListener('click', resetChart);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            chart.resize(document.getElementById('chart').clientWidth, 500);
+        });
+
+        // Initial status
+        updateStatus('disconnected');
+    </script>
+</body>
+</html>
