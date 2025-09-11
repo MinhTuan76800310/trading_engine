@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binance-Style Trading Interface</title>
+    <title>Advanced Trading Interface</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -53,9 +53,14 @@
             gap: 15px;
         }
         
-        .symbol {
-            font-size: 20px;
-            font-weight: bold;
+        .symbol-selector {
+            background-color: #2b3139;
+            border: none;
+            color: #eaecef;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
         }
         
         .price {
@@ -339,6 +344,26 @@
                 grid-column: 1;
             }
         }
+
+        /* Chart type selector */
+        .chart-type-selector {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .chart-type {
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            background-color: #2b3139;
+        }
+
+        .chart-type.active {
+            background-color: #f0b90b;
+            color: #0c0e14;
+        }
     </style>
 </head>
 <body>
@@ -349,7 +374,16 @@
                 <span>Binance</span>
             </div>
             <div class="symbol-info">
-                <div class="symbol">BTC/USDT</div>
+                <select class="symbol-selector" id="symbol-selector">
+                    <option value="BTCUSDT">BTC/USDT</option>
+                    <option value="ETHUSDT">ETH/USDT</option>
+                    <option value="XRPUSDT">XRP/USDT</option>
+                    <option value="ADAUSDT">ADA/USDT</option>
+                    <option value="DOTUSDT">DOT/USDT</option>
+                    <option value="BNBUSDT">BNB/USDT</option>
+                    <option value="SOLUSDT">SOL/USDT</option>
+                    <option value="DOGEUSDT">DOGE/USDT</option>
+                </select>
                 <div class="price" id="current-price">36,542.50</div>
                 <div class="change" id="price-change">+2.45%</div>
             </div>
@@ -367,58 +401,15 @@
         <div class="sidebar">
             <div class="favorites">
                 <div class="section-title">Favorites</div>
-                <ul class="market-list">
-                    <li class="market-item">
-                        <span class="market-name">BTC/USDT</span>
-                        <span class="market-price">36,542.50</span>
-                        <span class="market-change">+2.45%</span>
-                    </li>
-                    <li class="market-item">
-                        <span class="market-name">ETH/USDT</span>
-                        <span class="market-price">2,045.20</span>
-                        <span class="market-change">+1.87%</span>
-                    </li>
-                    <li class="market-item">
-                        <span class="market-name">BNB/USDT</span>
-                        <span class="market-price">315.75</span>
-                        <span class="market-change negative">-0.35%</span>
-                    </li>
-                    <li class="market-item">
-                        <span class="market-name">SOL/USDT</span>
-                        <span class="market-price">102.40</span>
-                        <span class="market-change">+5.22%</span>
-                    </li>
+                <ul class="market-list" id="favorites-list">
+                    <!-- Favorites will be populated dynamically -->
                 </ul>
             </div>
             
             <div class="markets">
                 <div class="section-title">Markets</div>
-                <ul class="market-list">
-                    <li class="market-item">
-                        <span class="market-name">BTC/USDT</span>
-                        <span class="market-price">36,542.50</span>
-                        <span class="market-change">+2.45%</span>
-                    </li>
-                    <li class="market-item">
-                        <span class="market-name">ETH/USDT</span>
-                        <span class="market-price">2,045.20</span>
-                        <span class="market-change">+1.87%</span>
-                    </li>
-                    <li class="market-item">
-                        <span class="market-name">XRP/USDT</span>
-                        <span class="market-price">0.6325</span>
-                        <span class="market-change negative">-1.05%</span>
-                    </li>
-                    <li class="market-item">
-                        <span class="market-name">ADA/USDT</span>
-                        <span class="market-price">0.4521</span>
-                        <span class="market-change">+0.82%</span>
-                    </li>
-                    <li class="market-item">
-                        <span class="market-name">DOT/USDT</span>
-                        <span class="market-price">5.24</span>
-                        <span class="market-change negative">-0.45%</span>
-                    </li>
+                <ul class="market-list" id="markets-list">
+                    <!-- Markets will be populated dynamically -->
                 </ul>
             </div>
         </div>
@@ -433,6 +424,10 @@
                     <div class="interval" data-interval="4h">4h</div>
                     <div class="interval" data-interval="1d">1d</div>
                     <div class="interval" data-interval="1w">1w</div>
+                    <div class="chart-type-selector">
+                        <div class="chart-type active" data-type="candles"><i class="fas fa-bars"></i> Candles</div>
+                        <div class="chart-type" data-type="line"><i class="fas fa-line-chart"></i> Line</div>
+                    </div>
                 </div>
                 <div class="chart-options">
                     <button class="btn"><i class="fas fa-cog"></i> Indicators</button>
@@ -440,8 +435,7 @@
             </div>
             <div class="chart-container">
                 <div class="chart-toolbar">
-                    <button class="btn"><i class="fas fa-line-chart"></i> Line</button>
-                    <button class="btn"><i class="fas fa-bars"></i> Candles</button>
+                    <button class="btn" id="fullscreen-btn"><i class="fas fa-expand"></i></button>
                 </div>
                 <div id="chart"></div>
             </div>
@@ -450,25 +444,25 @@
         <div class="order-book">
             <div class="order-book-header">Order Book</div>
             <div class="order-book-content" id="order-book-content">
-                <!-- Order book data will be populated here -->
+                <!-- Order book will be populated dynamically -->
             </div>
         </div>
         
         <div class="trade-history">
             <div class="trade-history-header">
                 <div class="section-title">Market Trades</div>
-                <button class="btn"><i class="fas fa-refresh"></i> Refresh</button>
+                <button class="btn" id="refresh-trades"><i class="fas fa-refresh"></i> Refresh</button>
             </div>
             <table class="trades-table">
                 <thead>
                     <tr>
                         <th>Price (USDT)</th>
-                        <th>Amount (BTC)</th>
+                        <th>Amount</th>
                         <th>Time</th>
                     </tr>
                 </thead>
                 <tbody id="trades-body">
-                    <!-- Trade data will be populated here -->
+                    <!-- Trades will be populated dynamically -->
                 </tbody>
             </table>
         </div>
@@ -476,431 +470,724 @@
 
     <script src="https://unpkg.com/lightweight-charts@4.0.1/dist/lightweight-charts.standalone.production.js"></script>
     <script>
-        // Initialize chart
-        const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-            width: document.getElementById('chart').clientWidth,
-            height: document.getElementById('chart').clientHeight,
-            layout: {
-                backgroundColor: '#0c0e14',
-                textColor: '#848e9c',
-            },
-            grid: {
-                vertLines: {
-                    color: '#161a25',
-                },
-                horzLines: {
-                    color: '#161a25',
-                },
-            },
-            crosshair: {
-                mode: LightweightCharts.CrosshairMode.Normal,
-            },
-            priceScale: {
-                borderColor: '#161a25',
-            },
-            timeScale: {
-                borderColor: '#161a25',
-                timeVisible: true,
-                secondsVisible: false,
-            },
-        });
+        // Configuration
+        const CONFIG = {
+            binanceWebSocketBase: 'wss://stream.binance.com:9443/ws/',
+            symbols: [
+                {id: 'BTCUSDT', name: 'BTC/USDT', base: 'BTC', quote: 'USDT'},
+                {id: 'ETHUSDT', name: 'ETH/USDT', base: 'ETH', quote: 'USDT'},
+                {id: 'XRPUSDT', name: 'XRP/USDT', base: 'XRP', quote: 'USDT'},
+                {id: 'ADAUSDT', name: 'ADA/USDT', base: 'ADA', quote: 'USDT'},
+                {id: 'DOTUSDT', name: 'DOT/USDT', base: 'DOT', quote: 'USDT'},
+                {id: 'BNBUSDT', name: 'BNB/USDT', base: 'BNB', quote: 'USDT'},
+                {id: 'SOLUSDT', name: 'SOL/USDT', base: 'SOL', quote: 'USDT'},
+                {id: 'DOGEUSDT', name: 'DOGE/USDT', base: 'DOGE', quote: 'USDT'}
+            ],
+            intervals: ['1m', '5m', '15m', '1h', '4h', '1d', '1w'],
+            favorites: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT']
+        };
 
-        const candleSeries = chart.addCandlestickSeries({
-            upColor: '#00b15d',
-            downColor: '#f84960',
-            borderDownColor: '#f84960',
-            borderUpColor: '#00b15d',
-            wickDownColor: '#f84960',
-            wickUpColor: '#00b15d',
-        });
+        // State management
+        const state = {
+            currentSymbol: 'BTCUSDT',
+            currentInterval: '1m',
+            chartType: 'candles',
+            isConnected: false,
+            wsConnections: {},
+            priceData: {},
+            orderBookData: {},
+            tradeData: {},
+            chart: null,
+            candleSeries: null,
+            lineSeries: null
+        };
 
-        // Initial empty data
-        candleSeries.setData([]);
+        // DOM Elements
+        const elements = {
+            symbolSelector: document.getElementById('symbol-selector'),
+            currentPrice: document.getElementById('current-price'),
+            priceChange: document.getElementById('price-change'),
+            statusIndicator: document.getElementById('status-indicator'),
+            statusText: document.getElementById('status-text'),
+            connectBtn: document.getElementById('connectBtn'),
+            favoritesList: document.getElementById('favorites-list'),
+            marketsList: document.getElementById('markets-list'),
+            orderBookContent: document.getElementById('order-book-content'),
+            tradesBody: document.getElementById('trades-body'),
+            chartContainer: document.getElementById('chart'),
+            refreshTrades: document.getElementById('refresh-trades'),
+            fullscreenBtn: document.getElementById('fullscreen-btn')
+        };
 
-        // WebSocket connection
-        let ws = null;
-        let tradeWs = null;
-        let orderBookWs = null;
-        let reconnectTimeout = null;
-        let isConnected = false;
-        const statusIndicator = document.getElementById('status-indicator');
-        const statusText = document.getElementById('status-text');
-        const connectBtn = document.getElementById('connectBtn');
-        const currentPriceElement = document.getElementById('current-price');
-        const orderBookPriceElement = document.getElementById('order-book-price');
-        const priceChangeElement = document.getElementById('price-change');
-        const tradesBody = document.getElementById('trades-body');
-        const orderBookContent = document.getElementById('order-book-content');
-        
-        let lastPrice = 0;
-        let priceHistory = [];
-        let currentInterval = '1m';
-        let orderBookData = { bids: [], asks: [] };
-
-        // Binance WebSocket URLs
-        const BINANCE_WS_URL = 'wss://stream.binance.com:9443/ws/btcusdt@kline_';
-        const BINANCE_TRADE_WS_URL = 'wss://stream.binance.com:9443/ws/btcusdt@trade';
-        const BINANCE_ORDERBOOK_WS_URL = 'wss://stream.binance.com:9443/ws/btcusdt@depth20@100ms';
-
-        function connectWebSocket() {
-            updateStatus('connecting');
-            
-            // Close existing connections if any
-            disconnectWebSocket();
-            
-            // Clear any pending reconnection
-            if (reconnectTimeout) {
-                clearTimeout(reconnectTimeout);
-                reconnectTimeout = null;
-            }
-            
-            try {
-                // Connect to Binance WebSocket for kline data
-                ws = new WebSocket(`${BINANCE_WS_URL}${currentInterval}`);
-                
-                ws.onopen = () => {
-                    console.log('Connected to Binance WebSocket');
-                    isConnected = true;
-                    updateStatus('connected');
-                };
-                
-                ws.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        processKlineData(data);
-                    } catch (error) {
-                        console.error('Error parsing WebSocket message:', error);
-                    }
-                };
-                
-                ws.onerror = (error) => {
-                    console.error('WebSocket error:', error);
-                    updateStatus('error');
-                };
-                
-                ws.onclose = () => {
-                    console.log('WebSocket connection closed');
-                    isConnected = false;
-                    updateStatus('disconnected');
-                    
-                    // Try to reconnect after 5 seconds
-                    reconnectTimeout = setTimeout(connectWebSocket, 5000);
-                };
-                
-                // Connect to trade WebSocket
-                tradeWs = new WebSocket(BINANCE_TRADE_WS_URL);
-                tradeWs.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        processTradeData(data);
-                    } catch (error) {
-                        console.error('Error parsing trade WebSocket message:', error);
-                    }
-                };
-                
-                // Connect to order book WebSocket
-                orderBookWs = new WebSocket(BINANCE_ORDERBOOK_WS_URL);
-                orderBookWs.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        processOrderBookData(data);
-                    } catch (error) {
-                        console.error('Error parsing order book WebSocket message:', error);
-                    }
-                };
-                
-            } catch (error) {
-                console.error('Failed to create WebSocket connection:', error);
-                updateStatus('error');
-                
-                // Try to reconnect after 5 seconds
-                reconnectTimeout = setTimeout(connectWebSocket, 5000);
-            }
-        }
-
-        function disconnectWebSocket() {
-            if (ws) {
-                ws.close();
-                ws = null;
-            }
-            
-            if (tradeWs) {
-                tradeWs.close();
-                tradeWs = null;
-            }
-            
-            if (orderBookWs) {
-                orderBookWs.close();
-                orderBookWs = null;
-            }
-            
-            if (reconnectTimeout) {
-                clearTimeout(reconnectTimeout);
-                reconnectTimeout = null;
-            }
-            
-            isConnected = false;
+        // Initialize the application
+        function init() {
+            initializeChart();
+            populateSymbolSelector();
+            populateMarketLists();
+            setupEventListeners();
             updateStatus('disconnected');
         }
 
-        function updateStatus(status) {
-            // Remove all status classes
-            statusIndicator.classList.remove('status-connected', 'status-disconnected', 'status-connecting');
+        // Initialize the chart
+        function initializeChart() {
+            state.chart = LightweightCharts.createChart(elements.chartContainer, {
+                width: elements.chartContainer.clientWidth,
+                height: elements.chartContainer.clientHeight,
+                layout: {
+                    backgroundColor: '#0c0e14',
+                    textColor: '#848e9c',
+                },
+                grid: {
+                    vertLines: {
+                        color: '#161a25',
+                    },
+                    horzLines: {
+                        color: '#161a25',
+                    },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                priceScale: {
+                    borderColor: '#161a25',
+                },
+                timeScale: {
+                    borderColor: '#161a25',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+            });
+
+            state.candleSeries = state.chart.addCandlestickSeries({
+                upColor: '#00b15d',
+                downColor: '#f84960',
+                borderDownColor: '#f84960',
+                borderUpColor: '#00b15d',
+                wickDownColor: '#f84960',
+                wickUpColor: '#00b15d',
+            });
+
+            state.lineSeries = state.chart.addLineSeries({
+                color: '#f0b90b',
+                lineWidth: 2,
+            });
+
+            // Initially show candles
+            state.candleSeries.setData([]);
+            state.lineSeries.setData([]);
+        }
+
+        // Populate symbol selector dropdown
+        function populateSymbolSelector() {
+            CONFIG.symbols.forEach(symbol => {
+                const option = document.createElement('option');
+                option.value = symbol.id;
+                option.textContent = symbol.name;
+                elements.symbolSelector.appendChild(option);
+            });
+        }
+
+        // Populate market lists
+        function populateMarketLists() {
+            // Clear existing lists
+            elements.favoritesList.innerHTML = '';
+            elements.marketsList.innerHTML = '';
+
+            // Populate favorites
+            CONFIG.favorites.forEach(symbolId => {
+                const symbol = CONFIG.symbols.find(s => s.id === symbolId);
+                if (symbol) {
+                    const li = createMarketListItem(symbol);
+                    elements.favoritesList.appendChild(li);
+                }
+            });
+
+            // Populate all markets
+            CONFIG.symbols.forEach(symbol => {
+                if (!CONFIG.favorites.includes(symbol.id)) {
+                    const li = createMarketListItem(symbol);
+                    elements.marketsList.appendChild(li);
+                }
+            });
+        }
+
+        // Create a market list item
+        function createMarketListItem(symbol) {
+            const li = document.createElement('li');
+            li.className = 'market-item';
+            li.dataset.symbol = symbol.id;
             
-            switch(status) {
-                case 'connected':
-                    statusIndicator.classList.add('status-connected');
-                    statusText.textContent = 'Connected';
-                    connectBtn.innerHTML = '<i class="fas fa-wifi"></i> Disconnect';
-                    connectBtn.classList.remove('btn-primary');
-                    connectBtn.classList.add('btn-danger');
-                    break;
-                case 'connecting':
-                    statusIndicator.classList.add('status-connecting');
-                    statusText.textContent = 'Connecting...';
-                    connectBtn.innerHTML = '<i class="fas fa-wifi"></i> Connect';
-                    connectBtn.classList.remove('btn-danger');
-                    connectBtn.classList.add('btn-primary');
-                    break;
-                case 'disconnected':
-                    statusIndicator.classList.add('status-disconnected');
-                    statusText.textContent = 'Disconnected';
-                    connectBtn.innerHTML = '<i class="fas fa-wifi"></i> Connect';
-                    connectBtn.classList.remove('btn-danger');
-                    connectBtn.classList.add('btn-primary');
-                    break;
-                case 'error':
-                    statusIndicator.classList.add('status-disconnected');
-                    statusText.textContent = 'Connection Error';
-                    connectBtn.innerHTML = '<i class="fas fa-wifi"></i> Reconnect';
-                    connectBtn.classList.remove('btn-danger');
-                    connectBtn.classList.add('btn-primary');
-                    break;
+            li.innerHTML = `
+                <span class="market-name">${symbol.name}</span>
+                <span class="market-price" id="price-${symbol.id}">--</span>
+                <span class="market-change" id="change-${symbol.id}">--%</span>
+            `;
+            
+            li.addEventListener('click', () => {
+                changeSymbol(symbol.id);
+            });
+            
+            return li;
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Symbol selector change
+            elements.symbolSelector.addEventListener('change', (e) => {
+                changeSymbol(e.target.value);
+            });
+
+            // Connect button
+            elements.connectBtn.addEventListener('click', () => {
+                if (state.isConnected) {
+                    disconnectAllWebSockets();
+                } else {
+                    connectAllWebSockets();
+                }
+            });
+
+            // Interval buttons
+            document.querySelectorAll('.interval').forEach(interval => {
+                interval.addEventListener('click', () => {
+                    changeInterval(interval.dataset.interval);
+                });
+            });
+
+            // Chart type buttons
+            document.querySelectorAll('.chart-type').forEach(type => {
+                type.addEventListener('click', () => {
+                    changeChartType(type.dataset.type);
+                });
+            });
+
+            // Refresh trades button
+            elements.refreshTrades.addEventListener('click', () => {
+                fetchRecentTrades();
+            });
+
+            // Fullscreen button
+            elements.fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+            // Window resize
+            window.addEventListener('resize', () => {
+                if (state.chart) {
+                    state.chart.resize(
+                        elements.chartContainer.clientWidth,
+                        elements.chartContainer.clientHeight
+                    );
+                }
+            });
+        }
+
+        // Change current symbol
+        function changeSymbol(symbol) {
+            if (state.currentSymbol === symbol) return;
+            
+            // Disconnect current symbol WebSockets
+            disconnectSymbolWebSockets(state.currentSymbol);
+            
+            // Update state
+            state.currentSymbol = symbol;
+            elements.symbolSelector.value = symbol;
+            
+            // Clear current data
+            clearDisplayData();
+            
+            // Reconnect WebSockets for new symbol
+            if (state.isConnected) {
+                connectSymbolWebSockets(symbol);
+            }
+            
+            // Fetch historical data for the new symbol
+            fetchHistoricalData();
+            
+            // Update UI
+            updateSymbolInfo();
+        }
+
+        // Change interval
+        function changeInterval(interval) {
+            if (state.currentInterval === interval) return;
+            
+            // Update UI
+            document.querySelectorAll('.interval').forEach(i => {
+                i.classList.remove('active');
+                if (i.dataset.interval === interval) {
+                    i.classList.add('active');
+                }
+            });
+            
+            // Update state
+            state.currentInterval = interval;
+            
+            // Reconnect kline WebSocket with new interval
+            if (state.isConnected) {
+                disconnectWebSocket(state.wsConnections[`${state.currentSymbol}_kline`]);
+                connectKlineWebSocket(state.currentSymbol, interval);
+            }
+            
+            // Fetch historical data for the new interval
+            fetchHistoricalData();
+        }
+
+        // Change chart type
+        function changeChartType(type) {
+            if (state.chartType === type) return;
+            
+            // Update UI
+            document.querySelectorAll('.chart-type').forEach(t => {
+                t.classList.remove('active');
+                if (t.dataset.type === type) {
+                    t.classList.add('active');
+                }
+            });
+            
+            // Update state
+            state.chartType = type;
+            
+            // Update chart visibility
+            if (type === 'candles') {
+                state.candleSeries.setData(state.priceData[state.currentSymbol] || []);
+                state.lineSeries.setData([]);
+            } else {
+                const lineData = (state.priceData[state.currentSymbol] || []).map(candle => ({
+                    time: candle.time,
+                    value: candle.close
+                }));
+                state.lineSeries.setData(lineData);
+                state.candleSeries.setData([]);
             }
         }
 
-        function processKlineData(data) {
+        // Connect all WebSockets
+        function connectAllWebSockets() {
+            CONFIG.symbols.forEach(symbol => {
+                connectSymbolWebSockets(symbol.id);
+            });
+            updateStatus('connected');
+        }
+
+        // Connect WebSockets for a specific symbol
+        function connectSymbolWebSockets(symbol) {
+            connectKlineWebSocket(symbol, state.currentInterval);
+            connectTradeWebSocket(symbol);
+            connectOrderBookWebSocket(symbol);
+        }
+
+        // Disconnect all WebSockets
+        function disconnectAllWebSockets() {
+            Object.values(state.wsConnections).forEach(ws => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.close();
+                }
+            });
+            state.wsConnections = {};
+            updateStatus('disconnected');
+        }
+
+        // Disconnect WebSockets for a specific symbol
+        function disconnectSymbolWebSockets(symbol) {
+            const connectionTypes = ['kline', 'trade', 'depth'];
+            connectionTypes.forEach(type => {
+                const key = `${symbol}_${type}`;
+                if (state.wsConnections[key]) {
+                    state.wsConnections[key].close();
+                    delete state.wsConnections[key];
+                }
+            });
+        }
+
+        // Connect to kline WebSocket
+        function connectKlineWebSocket(symbol, interval) {
+            const ws = new WebSocket(`${CONFIG.binanceWebSocketBase}${symbol.toLowerCase()}@kline_${interval}`);
+            const key = `${symbol}_kline`;
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                processKlineData(symbol, data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error(`WebSocket error for ${symbol} kline:`, error);
+            };
+            
+            ws.onclose = () => {
+                console.log(`WebSocket closed for ${symbol} kline`);
+                if (state.isConnected && state.wsConnections[key] === ws) {
+                    setTimeout(() => connectKlineWebSocket(symbol, interval), 5000);
+                }
+            };
+            
+            state.wsConnections[key] = ws;
+        }
+
+        // Connect to trade WebSocket
+        function connectTradeWebSocket(symbol) {
+            const ws = new WebSocket(`${CONFIG.binanceWebSocketBase}${symbol.toLowerCase()}@trade`);
+            const key = `${symbol}_trade`;
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                processTradeData(symbol, data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error(`WebSocket error for ${symbol} trade:`, error);
+            };
+            
+            ws.onclose = () => {
+                console.log(`WebSocket closed for ${symbol} trade`);
+                if (state.isConnected && state.wsConnections[key] === ws) {
+                    setTimeout(() => connectTradeWebSocket(symbol), 5000);
+                }
+            };
+            
+            state.wsConnections[key] = ws;
+        }
+
+        // Connect to order book WebSocket
+        function connectOrderBookWebSocket(symbol) {
+            const ws = new WebSocket(`${CONFIG.binanceWebSocketBase}${symbol.toLowerCase()}@depth20@100ms`);
+            const key = `${symbol}_depth`;
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                processOrderBookData(symbol, data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error(`WebSocket error for ${symbol} depth:`, error);
+            };
+            
+            ws.onclose = () => {
+                console.log(`WebSocket closed for ${symbol} depth`);
+                if (state.isConnected && state.wsConnections[key] === ws) {
+                    setTimeout(() => connectOrderBookWebSocket(symbol), 5000);
+                }
+            };
+            
+            state.wsConnections[key] = ws;
+        }
+
+        // Process kline data
+        function processKlineData(symbol, data) {
             if (data.k) {
                 const kline = data.k;
-                
-                // Update the current price
-                const price = parseFloat(kline.c);
-                currentPriceElement.textContent = price.toLocaleString('en-US', { maximumFractionDigits: 2 });
-                
-                // Calculate price change
-                const openPrice = parseFloat(kline.o);
-                const change = ((price - openPrice) / openPrice) * 100;
-                
-                priceChangeElement.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-                priceChangeElement.className = change >= 0 ? 'change' : 'change negative';
-                currentPriceElement.className = change >= 0 ? 'price' : 'price negative';
-                
-                // Update the chart
                 const candle = {
                     time: kline.t / 1000,
-                    open: openPrice,
+                    open: parseFloat(kline.o),
                     high: parseFloat(kline.h),
                     low: parseFloat(kline.l),
-                    close: price
+                    close: parseFloat(kline.c)
                 };
                 
-                candleSeries.update(candle);
+                // Update price data
+                if (!state.priceData[symbol]) {
+                    state.priceData[symbol] = [];
+                }
+                
+                // Check if we already have this candle
+                const existingIndex = state.priceData[symbol].findIndex(c => c.time === candle.time);
+                if (existingIndex >= 0) {
+                    state.priceData[symbol][existingIndex] = candle;
+                } else {
+                    state.priceData[symbol].push(candle);
+                    
+                    // Keep only the last 1000 candles
+                    if (state.priceData[symbol].length > 1000) {
+                        state.priceData[symbol].shift();
+                    }
+                }
+                
+                // Update chart if this is the current symbol
+                if (symbol === state.currentSymbol) {
+                    if (state.chartType === 'candles') {
+                        state.candleSeries.update(candle);
+                    } else {
+                        const lineData = {
+                            time: candle.time,
+                            value: candle.close
+                        };
+                        state.lineSeries.update(lineData);
+                    }
+                    
+                    // Update current price display
+                    updateSymbolPrice(symbol, candle.close);
+                }
             }
         }
 
-        function processTradeData(trade) {
-            const now = new Date(trade.T);
-            const timeString = now.toLocaleTimeString();
+        // Process trade data
+        function processTradeData(symbol, data) {
+            if (symbol === state.currentSymbol) {
+                addTradeToHistory({
+                    price: parseFloat(data.p),
+                    quantity: parseFloat(data.q),
+                    time: new Date(data.T),
+                    isBuyerMaker: data.m
+                });
+            }
+        }
+
+        // Process order book data
+        function processOrderBookData(symbol, data) {
+            if (symbol === state.currentSymbol) {
+                state.orderBookData[symbol] = {
+                    bids: data.bids.slice(0, 10),
+                    asks: data.asks.slice(0, 10).reverse()
+                };
+                renderOrderBook();
+            }
+        }
+
+        // Update symbol price display
+        function updateSymbolPrice(symbol, price) {
+            const priceElement = document.getElementById(`price-${symbol}`);
+            const changeElement = document.getElementById(`change-${symbol}`);
             
+            if (priceElement && changeElement) {
+                // Update price
+                priceElement.textContent = price.toLocaleString('en-US', { maximumFractionDigits: 8 });
+                
+                // Calculate and update change if we have previous data
+                if (state.priceData[symbol] && state.priceData[symbol].length > 1) {
+                    const previousClose = state.priceData[symbol][state.priceData[symbol].length - 2].close;
+                    const change = ((price - previousClose) / previousClose) * 100;
+                    
+                    changeElement.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+                    changeElement.className = change >= 0 ? 'market-change' : 'market-change negative';
+                    priceElement.className = change >= 0 ? 'market-price' : 'market-price negative';
+                    
+                    // Update main display if this is the current symbol
+                    if (symbol === state.currentSymbol) {
+                        elements.currentPrice.textContent = price.toLocaleString('en-US', { maximumFractionDigits: 8 });
+                        elements.priceChange.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+                        elements.priceChange.className = change >= 0 ? 'change' : 'change negative';
+                        elements.currentPrice.className = change >= 0 ? 'price' : 'price negative';
+                    }
+                }
+            }
+        }
+
+        // Add trade to history
+        function addTradeToHistory(trade) {
             const row = document.createElement('tr');
             
             const priceCell = document.createElement('td');
-            priceCell.textContent = parseFloat(trade.p).toLocaleString('en-US', { maximumFractionDigits: 2 });
-            priceCell.className = trade.m ? 'negative' : 'price';
+            priceCell.textContent = trade.price.toLocaleString('en-US', { maximumFractionDigits: 8 });
+            priceCell.className = trade.isBuyerMaker ? 'negative' : 'price';
             
             const amountCell = document.createElement('td');
-            amountCell.textContent = parseFloat(trade.q).toFixed(5);
+            amountCell.textContent = trade.quantity.toFixed(8);
             
             const timeCell = document.createElement('td');
-            timeCell.textContent = timeString;
+            timeCell.textContent = trade.time.toLocaleTimeString();
             
             row.appendChild(priceCell);
             row.appendChild(amountCell);
             row.appendChild(timeCell);
             
-            tradesBody.insertBefore(row, tradesBody.firstChild);
+            elements.tradesBody.insertBefore(row, elements.tradesBody.firstChild);
             
-            // Keep only the last 50 trades
-            if (tradesBody.children.length > 50) {
-                tradesBody.removeChild(tradesBody.lastChild);
+            // Keep only the last 100 trades
+            if (elements.tradesBody.children.length > 100) {
+                elements.tradesBody.removeChild(elements.tradesBody.lastChild);
             }
         }
 
-        function processOrderBookData(data) {
-            // Update order book data
-            if (data.bids) {
-                orderBookData.bids = data.bids.slice(0, 10); // Top 10 bids
-            }
-            if (data.asks) {
-                orderBookData.asks = data.asks.slice(0, 10); // Top 10 asks
-            }
-            
-            // Render order book
-            renderOrderBook();
-        }
-
+        // Render order book
         function renderOrderBook() {
-            // Clear existing content
-            orderBookContent.innerHTML = '';
+            const symbol = state.currentSymbol;
+            const orderBook = state.orderBookData[symbol];
             
-            // Add sell orders (asks)
-            orderBookData.asks.slice().reverse().forEach(order => {
+            if (!orderBook) {
+                elements.orderBookContent.innerHTML = '<div class="order-row">Loading order book...</div>';
+                return;
+            }
+            
+            let html = '';
+            
+            // Add asks (sell orders)
+            orderBook.asks.forEach(order => {
                 const price = parseFloat(order[0]);
                 const amount = parseFloat(order[1]);
                 const total = price * amount;
                 
-                const row = document.createElement('div');
-                row.className = 'order-row sell';
-                
-                const priceElem = document.createElement('div');
-                priceElem.className = 'order-price';
-                priceElem.textContent = price.toLocaleString('en-US', { maximumFractionDigits: 2 });
-                
-                const amountElem = document.createElement('div');
-                amountElem.className = 'order-amount';
-                amountElem.textContent = amount.toFixed(5);
-                
-                const totalElem = document.createElement('div');
-                totalElem.className = 'order-total';
-                totalElem.textContent = total.toLocaleString('en-US', { maximumFractionDigits: 2 });
-                
-                row.appendChild(priceElem);
-                row.appendChild(amountElem);
-                row.appendChild(totalElem);
-                
-                orderBookContent.appendChild(row);
+                html += `
+                    <div class="order-row sell">
+                        <div class="order-price">${price.toLocaleString('en-US', { maximumFractionDigits: 8 })}</div>
+                        <div class="order-amount">${amount.toFixed(8)}</div>
+                        <div class="order-total">${total.toLocaleString('en-US', { maximumFractionDigits: 2 })}</div>
+                    </div>
+                `;
             });
             
             // Add current price
-            const currentPriceRow = document.createElement('div');
-            currentPriceRow.className = 'current-price';
-            currentPriceRow.textContent = lastPrice.toLocaleString('en-US', { maximumFractionDigits: 2 });
-            currentPriceRow.id = 'order-book-price';
-            orderBookContent.appendChild(currentPriceRow);
+            const currentPrice = state.priceData[symbol] && state.priceData[symbol].length > 0 
+                ? state.priceData[symbol][state.priceData[symbol].length - 1].close 
+                : 0;
+                
+            html += `
+                <div class="current-price">
+                    ${currentPrice.toLocaleString('en-US', { maximumFractionDigits: 8 })}
+                </div>
+            `;
             
-            // Add buy orders (bids)
-            orderBookData.bids.forEach(order => {
+            // Add bids (buy orders)
+            orderBook.bids.forEach(order => {
                 const price = parseFloat(order[0]);
                 const amount = parseFloat(order[1]);
                 const total = price * amount;
                 
-                const row = document.createElement('div');
-                row.className = 'order-row';
-                
-                const priceElem = document.createElement('div');
-                priceElem.className = 'order-price';
-                priceElem.textContent = price.toLocaleString('en-US', { maximumFractionDigits: 2 });
-                
-                const amountElem = document.createElement('div');
-                amountElem.className = 'order-amount';
-                amountElem.textContent = amount.toFixed(5);
-                
-                const totalElem = document.createElement('div');
-                totalElem.className = 'order-total';
-                totalElem.textContent = total.toLocaleString('en-US', { maximumFractionDigits: 2 });
-                
-                row.appendChild(priceElem);
-                row.appendChild(amountElem);
-                row.appendChild(totalElem);
-                
-                orderBookContent.appendChild(row);
-            });
-        }
-
-        function changeInterval(interval) {
-            currentInterval = interval;
-            
-            // Update active class
-            document.querySelectorAll('.interval').forEach(el => {
-                el.classList.remove('active');
-                if (el.dataset.interval === interval) {
-                    el.classList.add('active');
-                }
-            });
-            
-            // Reconnect with new interval
-            if (isConnected) {
-                disconnectWebSocket();
-                connectWebSocket();
-            }
-        }
-
-        // Connect button handler
-        connectBtn.addEventListener('click', () => {
-            if (isConnected) {
-                disconnectWebSocket();
-            } else {
-                connectWebSocket();
-            }
-        });
-
-        // Handle interval clicks
-        document.querySelectorAll('.interval').forEach(interval => {
-            interval.addEventListener('click', () => {
-                changeInterval(interval.dataset.interval);
-            });
-        });
-
-        // Update chart on resize
-        window.addEventListener('resize', () => {
-            chart.resize(
-                document.getElementById('chart').clientWidth,
-                document.getElementById('chart').clientHeight
-            );
-        });
-
-        // Initial status
-        updateStatus('disconnected');
-        
-        // Add some initial data for display purposes
-        setTimeout(() => {
-            if (!isConnected) {
-                // Add sample data for demonstration
-                tradesBody.innerHTML = `
-                    <tr>
-                        <td class="price">36,542.50</td>
-                        <td>0.452</td>
-                        <td>12:45:23</td>
-                    </tr>
-                    <tr>
-                        <td class="price">36,543.20</td>
-                        <td>1.241</td>
-                        <td>12:45:21</td>
-                    </tr>
-                    <tr>
-                        <td class="negative">36,540.75</td>
-                        <td>0.874</td>
-                        <td>12:45:18</td>
-                    </tr>
+                html += `
+                    <div class="order-row">
+                        <div class="order-price">${price.toLocaleString('en-US', { maximumFractionDigits: 8 })}</div>
+                        <div class="order-amount">${amount.toFixed(8)}</div>
+                        <div class="order-total">${total.toLocaleString('en-US', { maximumFractionDigits: 2 })}</div>
+                    </div>
                 `;
+            });
+            
+            elements.orderBookContent.innerHTML = html;
+        }
+
+        // Fetch historical data
+        function fetchHistoricalData() {
+            const symbol = state.currentSymbol;
+            const interval = state.currentInterval;
+            
+            // In a real application, you would fetch this from Binance API
+            // For demo purposes, we'll generate some random data
+            const now = Date.now();
+            const data = [];
+            
+            for (let i = 100; i >= 0; i--) {
+                const time = now - i * 60000; // 1 minute intervals
+                const open = 30000 + Math.random() * 1000;
+                const high = open + Math.random() * 200;
+                const low = open - Math.random() * 200;
+                const close = low + Math.random() * (high - low);
                 
-                // Add sample order book data
-                orderBookData = {
-                    bids: [
-                        ['36540.10', '0.321'],
-                        ['36538.45', '1.542'],
-                        ['36535.90', '0.875']
-                    ],
-                    asks: [
-                        ['36550.20', '0.452'],
-                        ['36548.75', '1.241'],
-                        ['36545.30', '0.874']
-                    ]
-                };
-                
-                renderOrderBook();
+                data.push({
+                    time: time / 1000,
+                    open,
+                    high,
+                    low,
+                    close
+                });
             }
-        }, 1000);
+            
+            state.priceData[symbol] = data;
+            
+            if (state.chartType === 'candles') {
+                state.candleSeries.setData(data);
+            } else {
+                const lineData = data.map(candle => ({
+                    time: candle.time,
+                    value: candle.close
+                }));
+                state.lineSeries.setData(lineData);
+            }
+            
+            // Update symbol info
+            updateSymbolInfo();
+        }
+
+        // Fetch recent trades
+        function fetchRecentTrades() {
+            // In a real application, you would fetch this from Binance API
+            // For demo purposes, we'll clear the current trades
+            elements.tradesBody.innerHTML = '<tr><td colspan="3">Loading trades...</td></tr>';
+            
+            // Simulate API delay
+            setTimeout(() => {
+                elements.tradesBody.innerHTML = '';
+            }, 1000);
+        }
+
+        // Update symbol info
+        function updateSymbolInfo() {
+            const symbol = state.currentSymbol;
+            const priceData = state.priceData[symbol];
+            
+            if (priceData && priceData.length > 0) {
+                const currentPrice = priceData[priceData.length - 1].close;
+                elements.currentPrice.textContent = currentPrice.toLocaleString('en-US', { maximumFractionDigits: 8 });
+                
+                if (priceData.length > 1) {
+                    const previousClose = priceData[priceData.length - 2].close;
+                    const change = ((currentPrice - previousClose) / previousClose) * 100;
+                    elements.priceChange.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+                    elements.priceChange.className = change >= 0 ? 'change' : 'change negative';
+                    elements.currentPrice.className = change >= 0 ? 'price' : 'price negative';
+                }
+            }
+        }
+
+        // Clear display data
+        function clearDisplayData() {
+            elements.tradesBody.innerHTML = '';
+            elements.orderBookContent.innerHTML = '<div class="order-row">Loading...</div>';
+            
+            if (state.chartType === 'candles') {
+                state.candleSeries.setData([]);
+            } else {
+                state.lineSeries.setData([]);
+            }
+        }
+
+        // Update connection status
+        function updateStatus(status) {
+            // Remove all status classes
+            elements.statusIndicator.classList.remove('status-connected', 'status-disconnected', 'status-connecting');
+            
+            switch(status) {
+                case 'connected':
+                    state.isConnected = true;
+                    elements.statusIndicator.classList.add('status-connected');
+                    elements.statusText.textContent = 'Connected';
+                    elements.connectBtn.innerHTML = '<i class="fas fa-wifi"></i> Disconnect';
+                    elements.connectBtn.classList.remove('btn-primary');
+                    elements.connectBtn.classList.add('btn-danger');
+                    break;
+                case 'connecting':
+                    elements.statusIndicator.classList.add('status-connecting');
+                    elements.statusText.textContent = 'Connecting...';
+                    elements.connectBtn.innerHTML = '<i class="fas fa-wifi"></i> Connect';
+                    elements.connectBtn.classList.remove('btn-danger');
+                    elements.connectBtn.classList.add('btn-primary');
+                    break;
+                case 'disconnected':
+                    state.isConnected = false;
+                    elements.statusIndicator.classList.add('status-disconnected');
+                    elements.statusText.textContent = 'Disconnected';
+                    elements.connectBtn.innerHTML = '<i class="fas fa-wifi"></i> Connect';
+                    elements.connectBtn.classList.remove('btn-danger');
+                    elements.connectBtn.classList.add('btn-primary');
+                    break;
+            }
+        }
+
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                elements.chartContainer.requestFullscreen().catch(err => {
+                    console.error('Error attempting to enable fullscreen:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Close WebSocket
+        function disconnectWebSocket(ws) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            }
+        }
+
+        // Initialize the application when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
